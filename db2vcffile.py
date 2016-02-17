@@ -10,7 +10,7 @@ class open_file():
 
     def __init__(self):
         # specify the file
-        self.outputfile1 = "/home/aled/Documents/inhouse_data/all_inhouse.vcf"
+        self.outputfile1 = "/home/aled/Documents/inhouse_data/all_inhouse2.vcf"
         # self.outputfile1 = "I:\\inhouse_data\\hg19_het_inhouse_MAF.txt"
         # self.outputfile2 = "I:\\inhouse_data\\hg19_hom_inhouse_MAF.txt"
 
@@ -27,11 +27,11 @@ class open_file():
         #sql for autosomes
         sql = "select chr,start,ID,ref,alt,100,'PASS','DP=100','GT','0/1', MAF \
         from inhouse_data.autosomes import \
-        where ref != '-' and alt !='-' and chr = %s and MAF is not Null\
+        where ref != '-' and alt !='-' and chr = %s and MAF is not Null \
         union\
         select chr,start,ID,upper(aled_ref),concat(upper(aled_ref),alt),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
         from inhouse_data.autosomes\
-        where ref = '-' and chr = %s and MAF is not Null\
+        where ref = '-' and chr = %s and MAF is not Null \
         union\
         select chr,start-2,ID,concat(upper(aled_ref),ref),upper(aled_ref),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
         from inhouse_data.autosomes\
@@ -44,7 +44,7 @@ class open_file():
             cursor = db.cursor()
     
             try:
-                cursor.execute(sql)
+                cursor.execute(sql,[i,i,i])
                 result = cursor.fetchall()
             except MySQLdb.Error, e:
                 db.rollback()
