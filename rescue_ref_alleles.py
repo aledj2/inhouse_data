@@ -1,8 +1,3 @@
-'''
-Created on 12 Nov 2015
-
-@author: aled
-'''
 import MySQLdb
 import subprocess
 
@@ -21,10 +16,10 @@ class get_ref_allele():
         self.database = "inhouse_data"
 
         # set parameters, ins or del and what table to update
-        # self.ins_or_del = "del"
-        self.ins_or_del = "ins"
-        # self.autosome_or_sex = "autosomes"
-        self.autosome_or_sex = "sex_chroms"
+        self.ins_or_del = "del"
+        # self.ins_or_del = "ins"
+        self.autosome_or_sex = "autosomes"
+        # self.autosome_or_sex = "sex_chroms"
 
     def run_query(self):
         
@@ -58,7 +53,7 @@ class get_ref_allele():
                 # for deletions we need to find the two bases preceeding the deletion therefore adjust the start position to start - 2
                 start_minus_2 = int(start) - 2
                 # create the new coordinates
-                del_coord = "chr" + chrom + ":" + str(start_minus_2) + "-" + str(stop)
+                del_coord = "chr" + str(chrom) + ":" + str(start_minus_2) + "-" + str(stop)
 
                 # run the samtools command via command line
                 proc = subprocess.Popen(["samtools faidx /home/aled/Documents/Reference_Genomes/hg19.fa " + del_coord], stdout=subprocess.PIPE, shell=True)

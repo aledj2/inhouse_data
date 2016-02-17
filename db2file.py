@@ -10,7 +10,7 @@ class open_file():
 
     def __init__(self):
         # specify the file
-        self.outputfile1 = "/home/aled/Documents/inhouse_data/hg19_inhouse_MAF.txt"
+        self.outputfile1 = "/home/aled/Documents/inhouse_data/hg19_inhouse_hom_count.txt"
         #self.outputfile1 = "I:\\inhouse_data\\hg19_het_inhouse_MAF.txt"
         #self.outputfile2 = "I:\\inhouse_data\\hg19_hom_inhouse_MAF.txt"
 
@@ -25,32 +25,36 @@ class open_file():
         outputfile = open(self.outputfile1, 'a')
         #outputfile2 = open(self.outputfile2, 'a')
 
-        # sql statement
-        sql1 = "select chr, start, stop, ref, alt, maf from sex_chroms where maf is not null and ref !='-' union select chr, start, stop, Aled_ref, alt, maf from sex_chroms where maf is not null and ref ='-'"
+        # sql statement to create a flat file containing hom count 
+        sql1 = "select chr, start, stop, ref, alt, num_hom from sex_chroms where MAF is not null"
 
-        sql2 = "select chr, start, stop, ref, alt, comb_maf from autosomes where chr in (2,3,4,5,6,7,8,9) and comb_maf is not null and ref != '-' union elect chr, start, stop, aled_ref, alt, comb_maf from autosomes where chr in (2,3,4,5,6,7,8,9) and comb_maf is not null and ref = '-'"
+        sql2 = "select chr, start, stop, ref, alt, num_hom from autosomes where chr in (2,3,4,5,6,7,8,9) and comb_MAF is not null"
 
-        sql3 = "select chr, start, stop, ref, alt, comb_maf from autosomes where chr in (10,11,12,13,14,15,16,1) and comb_maf is not null and ref != '-' union select chr, start, stop, aled_ref, alt, comb_maf from autosomes where chr in (10,11,12,13,14,15,16,1) and comb_maf is not null and ref = '-'"
+        sql3 = "select chr, start, stop, ref, alt, num_hom from autosomes where chr in (10,11,12,13,14,15,16,1) and comb_MAF is not null"
 
-        sql4 = "select chr, start, stop, ref, alt, comb_maf from autosomes where chr in (17,18,19,20,21,22) and comb_maf is not null and ref = '-' union select chr, start, stop, aled_ref, alt, comb_maf from autosomes where chr in (17,18,19,20,21,22) and comb_maf is not null and ref != '-'"
+        sql4 = "select chr, start, stop, ref, alt, num_hom from autosomes where chr in (17,18,19,20,21,22) and comb_MAF is not null"
 
-################################################################################
-#         sql5 = "select chr, start, stop, ref, alt, hom_maf\
-#              from sex_chroms\
-#             where hom_MAF is not null"
-#
-#         sql6 = "select chr, start, stop, ref, alt, hom_maf\
-#             from autosomes\
-#             where chr in (2,3,4,5,6,7,8,9) and hom_MAF is not null "
-#
-#         sql7 = "select chr, start, stop, ref, alt, hom_maf\
-#              from autosomes\
-#             where chr in (10,11,12,13,14,15,16,1) and hom_MAF is not null "
-#
-#         sql8 = "select chr, start, stop, ref, alt, hom_maf\
-#              from autosomes\
-#             where chr in (17,18,19,20,21,22) and hom_MAF is not null "
-################################################################################
+###############################################################################
+#         # sql statement to create a flat file containing het count 
+#         sql1 = "select chr, start, stop, ref, alt, num_het from sex_chroms where MAF is not null"
+# 
+#         sql2 = "select chr, start, stop, ref, alt, num_het from autosomes where chr in (2,3,4,5,6,7,8,9) and comb_MAF is not null"
+# 
+#         sql3 = "select chr, start, stop, ref, alt, num_het from autosomes where chr in (10,11,12,13,14,15,16,1) and comb_MAF is not null"
+# 
+#         sql4 = "select chr, start, stop, ref, alt, num_het from autosomes where chr in (17,18,19,20,21,22) and comb_MAF is not null"
+###############################################################################
+
+###############################################################################
+#         # sql statement to create a flat file containing MAF 
+#         sql1 = "select chr, start, stop, ref, alt, MAF from sex_chroms where MAF is not null"
+# 
+#         sql2 = "select chr, start, stop, ref, alt, comb_MAF from autosomes where chr in (2,3,4,5,6,7,8,9) and comb_MAF is not null"
+# 
+#         sql3 = "select chr, start, stop, ref, alt, comb_MAF from autosomes where chr in (10,11,12,13,14,15,16,1) and comb_MAF is not null"
+# 
+#         sql4 = "select chr, start, stop, ref, alt, comb_MAF from autosomes where chr in (17,18,19,20,21,22) and comb_MAF is not null"
+###############################################################################
 
         # open connection to database and run SQL statement
         db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
@@ -67,7 +71,7 @@ class open_file():
         finally:
             db.close()
 
-        # loop through the query result adding the scores to the desired dictionary value
+        # loop through the query result 
         for i in flatfile1:
             chr = i[0]
             start = i[1]
@@ -79,7 +83,7 @@ class open_file():
             # print chr + "\t" + start + "\t" + stop + "\t" + ref + "\t" + alt + "\t" + MAF
             outputfile.write(str(chr) + "\t" + str(start) + "\t" + str(stop) + "\t" + str(ref) + "\t" + str(alt) + "\t" + str(MAF) + "\n")
         flatfile1 = []
-        # open connection to database and run SQL statement to extract the Z scores, the probe orderID and chromosome
+        # open connection to database and run SQL statement
         db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
         cursor = db.cursor()
 
@@ -94,7 +98,7 @@ class open_file():
         finally:
             db.close()
 
-        # loop through the query result adding the scores to the desired dictionary value
+        # loop through the query result
         for i in flatfile2:
             chr = i[0]
             start = i[1]
@@ -107,7 +111,7 @@ class open_file():
             outputfile.write(str(chr) + "\t" + str(start) + "\t" + str(stop) + "\t" + str(ref) + "\t" + str(alt) + "\t" + str(MAF) + "\n")
         flatfile2 = []
 
-        # open connection to database and run SQL statement to extract the Z scores, the probe orderID and chromosome
+        # open connection to database and run SQL statement
         db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
         cursor = db.cursor()
 
@@ -122,7 +126,7 @@ class open_file():
         finally:
             db.close()
 
-        # loop through the query result adding the scores to the desired dictionary value
+        # loop through the query result
         for i in flatfile3:
             chr = i[0]
             start = i[1]
@@ -135,7 +139,7 @@ class open_file():
             outputfile.write(str(chr) + "\t" + str(start) + "\t" + str(stop) + "\t" + str(ref) + "\t" + str(alt) + "\t" + str(MAF) + "\n")
         flatfile3 = []
 
-        # open connection to database and run SQL statement to extract the Z scores, the probe orderID and chromosome
+        # open connection to database and run SQL statement
         db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
         cursor = db.cursor()
 
@@ -150,7 +154,7 @@ class open_file():
         finally:
             db.close()
 
-        # loop through the query result adding the scores to the desired dictionary value
+        # loop through the query result
         for i in flatfile4:
             chr = i[0]
             start = i[1]
