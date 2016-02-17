@@ -21,11 +21,63 @@ class open_file():
         self.passwd = "mysql"
         self.database = "inhouse_data"
 
-    def run_query(self):
-        outputfile = open(self.outputfile1, 'a')
+    def run_query_auto(self):
+        outputfile = open(self.outputfile1, 'a')        
         
-        # sql statement  
+        #sql for autosomes
+        sql = "select chr,start,ID,ref,alt,100,'PASS','DP=100','GT','0/1', MAF \
+        from inhouse_data.autosomes import \
+        where ref != '-' and alt !='-' and chr = %s and MAF is not Null\
+        union\
+        select chr,start,ID,upper(aled_ref),concat(upper(aled_ref),alt),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
+        from inhouse_data.autosomes\
+        where ref = '-' and chr = %s and MAF is not Null\
+        union\
+        select chr,start-2,ID,concat(upper(aled_ref),ref),upper(aled_ref),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
+        from inhouse_data.autosomes\
+        where alt = '-' and chr = %s and MAF is not Null"  
         
+        # loop through each autosome to extract all non-null variants
+        for i in range(1, 23):
+            # open connection to database and run SQL statement
+            db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
+            cursor = db.cursor()
+    
+            try:
+                cursor.execute(sql)
+                result = cursor.fetchall()
+            except MySQLdb.Error, e:
+                db.rollback()
+                print "fail - unable to read db"
+                if e[0] != '###':
+                    raise
+            finally:
+                db.close()
+    
+            # loop through the query result 
+            for i in result:
+                chr = str(i[0])
+                start = str(i[1])
+                ID = str(i[2])
+                ref = str(i[3])
+                alt = str(i[4])
+                MAF = str(i[5])
+                QUAL = str(i[6])
+                FILTER = str(i[7])
+                INFO = str(i[8])
+                FORMAT = str(i[9])
+                SAMPLE = str(i[10])
+                
+                tab = "\t"
+                
+                outputfile.write(chr + tab + start + tab + ID + tab + ref + tab + alt + tab + MAF + tab + QUAL + tab + FILTER + tab + INFO + tab + FORMAT + tab + SAMPLE + "\n")
+        
+        outputfile.close()
+        
+    def run_query_sex(self):
+        outputfile = open(self.outputfile1, 'a')       
+        
+        # sql statement for sex chroms        
         sql = "select chr,start,ID,ref,alt,100,'PASS','DP=100','GT','0/1', MAF \
         from inhouse_data.sex_chroms \
         where ref != '-' and alt !='-' and MAF is not Null\
@@ -37,27 +89,11 @@ class open_file():
         select chr,start-2,ID,concat(upper(aled_ref),ref),upper(aled_ref),100,'PASS','INDEL;DP=100','GT','0/1', MAF \
         from inhouse_data.sex_chroms \
         where alt = '-' and MAF is not Null "
-        
-        ########################################################################
-        # sql = "select chr,start,ID,ref,alt,100,'PASS','DP=100','GT','0/1', MAF \
-        # from inhouse_data.autosomes import \
-        # where ref != '-' and alt !='-' and chr = %s and MAF is not Null\
-        # union\
-        # select chr,start,ID,upper(aled_ref),concat(upper(aled_ref),alt),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
-        # from inhouse_data.autosomes\
-        # where ref = '-' and chr = %s and MAF is not Null\
-        # union\
-        # select chr,start-2,ID,concat(upper(aled_ref),ref),upper(aled_ref),100,'PASS','INDEL;DP=100','GT','0/1', MAF\
-        # from inhouse_data.autosomes\
-        # where alt = '-' and chr = %s and MAF is not Null"  
-        ########################################################################
-        
-        
-        # for i in range(1,23):
+         
         # open connection to database and run SQL statement
         db = MySQLdb.Connect(host=self.host, port=self.port, user=self.username, passwd=self.passwd, db=self.database)
         cursor = db.cursor()
-
+ 
         try:
             cursor.execute(sql)
             result = cursor.fetchall()
@@ -68,7 +104,7 @@ class open_file():
                 raise
         finally:
             db.close()
-
+ 
         # loop through the query result 
         for i in result:
             chr = str(i[0])
@@ -82,14 +118,13 @@ class open_file():
             INFO = str(i[8])
             FORMAT = str(i[9])
             SAMPLE = str(i[10])
-            
+             
             tab = "\t"
-            
+             
             outputfile.write(chr + tab + start + tab + ID + tab + ref + tab + alt + tab + MAF + tab + QUAL + tab + FILTER + tab + INFO + tab + FORMAT + tab + SAMPLE + "\n")
-        
         outputfile.close()
         
-
 if __name__ == '__main__':
-    open_file().run_query()
+    open_file().run_query_auto()
+    open_file().run_query_sex()
     print "done"
